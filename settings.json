@@ -22,7 +22,8 @@
       "WebFetch(domain:*)",
       "Read(*)",
       "Bash(node ~/.claude/skills/clickup/query.mjs *)",
-      "Bash(node ~/.claude/skills/gitlab/query.mjs *)"
+      "Bash(node ~/.claude/skills/gitlab/query.mjs *)",
+      "Bash(node ~/.claude/skills/notion/query.mjs *)"
     ],
     "deny": [
       "Read(.env)"
