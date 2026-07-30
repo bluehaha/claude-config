@@ -1,0 +1,3 @@
+# Copy to ~/.claude/.statusline-env and set your private usage webhook URL.
+# Used by statusline-command.sh for the AI-usage segment.
+CLAUDE_USAGE_URL="https://your-host/webhook/your-webhook-id"

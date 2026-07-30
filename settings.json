@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git log:*)",
+      "Bash(poetry init:*)",
+      "Bash(poetry add:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(cat:*)",
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "Bash(echo:*)",
+      "Bash(rg:*)",
+      "WebFetch(domain:*)",
+      "Read(*)",
+      "Bash(node ~/.claude/skills/clickup/query.mjs *)",
+      "Bash(node ~/.claude/skills/gitlab/query.mjs *)"
+    ],
+    "deny": [
+      "Read(.env)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "skillOverrides": {
+    "playwright-skill": "user-invocable-only"
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/yushing/.claude/hooks/notify.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/yushing/.claude/hooks/english-check.py"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /Users/yushing/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "php-lsp@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "chrome-devtools-mcp@claude-plugins-official": false,
+    "playwright-skill@playwright-skill": true
+  },
+  "extraKnownMarketplaces": {
+    "playwright-skill": {
+      "source": {
+        "source": "github",
+        "repo": "lackeyjb/playwright-skill"
+      }
+    }
+  },
+  "alwaysThinkingEnabled": false,
+  "editorMode": "vim",
+  "preferredNotifChannel": "iterm2_with_bell",
+  "autoCompactEnabled": false,
+  "feedbackSurveyState": {
+    "lastShownTime": 1754091065222
+  }
+}
