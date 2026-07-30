@@ -4,10 +4,12 @@
 
 import { apiRequest } from './client.mjs';
 import { markdownToClickUp } from '../lib/markdown.mjs';
+import { taskQuery } from './tasks.mjs';
 
 // Get task comments
 export async function getComments(taskId) {
-  const response = await apiRequest(`/task/${taskId}/comment`);
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}/comment${params}`);
   return response.comments || [];
 }
 
@@ -22,7 +24,8 @@ export async function postComment(taskId, text, useMarkdown = true) {
     body = JSON.stringify({ comment_text: text });
   }
 
-  const response = await apiRequest(`/task/${taskId}/comment`, {
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}/comment${params}`, {
     method: 'POST',
     body,
   });

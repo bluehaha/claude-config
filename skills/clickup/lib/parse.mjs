@@ -26,6 +26,14 @@ export function parseTaskId(input) {
   return input; // Return as-is, let API handle validation
 }
 
+// Detect whether a task ID is a custom (friendly) ID rather than a standard ClickUp ID.
+// A standard ClickUp task ID is all lowercase alphanumeric (e.g. "86eyc0enm").
+// Custom task IDs have an uppercase prefix and/or a hyphen (e.g. "GA-123", "PROJ-4").
+// Custom IDs must be looked up with custom_task_ids=true&team_id={teamId}.
+export function isCustomTaskId(taskId) {
+  return !/^[a-z0-9]+$/.test(taskId);
+}
+
 // Extract list ID from URL or return as-is
 export function parseListId(input) {
   if (!input) return null;

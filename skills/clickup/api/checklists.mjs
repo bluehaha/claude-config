@@ -3,10 +3,12 @@
  */
 
 import { apiRequest } from './client.mjs';
+import { taskQuery } from './tasks.mjs';
 
 // Create a new checklist on a task
 export async function createChecklist(taskId, name) {
-  const response = await apiRequest(`/task/${taskId}/checklist`, {
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}/checklist${params}`, {
     method: 'POST',
     body: JSON.stringify({ name }),
   });
@@ -25,7 +27,8 @@ export async function addChecklistItem(checklistId, name, options = {}) {
 
 // Get checklists for a task (from task details)
 export async function getChecklists(taskId) {
-  const response = await apiRequest(`/task/${taskId}`);
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}${params}`);
   return response.checklists || [];
 }
 

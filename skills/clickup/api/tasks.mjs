@@ -4,10 +4,25 @@
 
 import { apiRequest } from './client.mjs';
 import { getList } from './lists.mjs';
+import { getTeamId } from './user.mjs';
+import { isCustomTaskId } from '../lib/parse.mjs';
+
+// Build the query string for a single-task endpoint, appending
+// custom_task_ids=true&team_id=... when the ID is a custom (friendly) ID.
+// getTeamId() is only called for custom IDs, so regular-ID calls make no extra request.
+export async function taskQuery(taskId, extra = {}) {
+  const params = new URLSearchParams(extra);
+  if (isCustomTaskId(taskId)) {
+    params.set('custom_task_ids', 'true');
+    params.set('team_id', await getTeamId());
+  }
+  const qs = params.toString();
+  return qs ? `?${qs}` : '';
+}
 
 // Get task details
 export async function getTask(taskId, includeSubtasks = false) {
-  const params = includeSubtasks ? '?subtasks=true' : '';
+  const params = await taskQuery(taskId, includeSubtasks ? { subtasks: 'true' } : {});
   const task = await apiRequest(`/task/${taskId}${params}`);
   return task;
 }
@@ -24,7 +39,8 @@ export async function getTasksInList(listId, assigneeId = null) {
 
 // Update a task
 export async function updateTask(taskId, updates) {
-  const response = await apiRequest(`/task/${taskId}`, {
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}${params}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
   });
@@ -250,7 +266,8 @@ export async function setPriority(taskId, priorityInput) {
 // Move task to a different list
 export async function moveTask(taskId, targetListId) {
   // Use the dedicated move endpoint
-  const response = await apiRequest(`/list/${targetListId}/task/${taskId}`, {
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/list/${targetListId}/task/${taskId}${params}`, {
     method: 'POST',
   });
   return response;
@@ -271,7 +288,8 @@ export async function addWatcher(taskId, userId) {
 export async function addTag(taskId, tagName) {
   // Tag names in URL must be URL-encoded
   const encodedTag = encodeURIComponent(tagName);
-  const response = await apiRequest(`/task/${taskId}/tag/${encodedTag}`, {
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}/tag/${encodedTag}${params}`, {
     method: 'POST',
   });
   return response;
@@ -280,7 +298,8 @@ export async function addTag(taskId, tagName) {
 // Remove a tag from a task
 export async function removeTag(taskId, tagName) {
   const encodedTag = encodeURIComponent(tagName);
-  const response = await apiRequest(`/task/${taskId}/tag/${encodedTag}`, {
+  const params = await taskQuery(taskId);
+  const response = await apiRequest(`/task/${taskId}/tag/${encodedTag}${params}`, {
     method: 'DELETE',
   });
   return response;
