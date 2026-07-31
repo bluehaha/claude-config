@@ -11,8 +11,13 @@ export function parseTaskId(input) {
     return input;
   }
 
+  // URL format: https://app.clickup.com/t/{team_id}/{task_id}
+  // The team ID comes first, so the task ID is the second segment.
+  const teamScopedMatch = input.match(/clickup\.com\/t\/\d+\/([a-zA-Z0-9-]+)/);
+  if (teamScopedMatch) return teamScopedMatch[1];
+
   // URL format: https://app.clickup.com/t/{task_id}
-  const shortMatch = input.match(/clickup\.com\/t\/([a-zA-Z0-9]+)/);
+  const shortMatch = input.match(/clickup\.com\/t\/([a-zA-Z0-9-]+)/);
   if (shortMatch) return shortMatch[1];
 
   // URL format: https://app.clickup.com/{team_id}/v/li/{list_id}?p={task_id}
