@@ -6,6 +6,9 @@
  * Commands:
  *   get <url|id>   Retrieve a task (fields, description, checklists) + comments as JSON
  *
+ * Flags:
+ *   --raw          Print the unmodified API response instead of the condensed shape
+ *
  * team_id resolution: taken from the URL when it has the /t/{team_id}/{task_id}
  * shape, otherwise from DEFAULT_TEAM_ID in .env.
  *
@@ -16,13 +19,17 @@ import { loadEnv } from './api/client.ts';
 import { runGet } from './commands/get.ts';
 import { showUsage } from './commands/usage.ts';
 
-// Parse arguments
+// Parse arguments. Flags are recognised anywhere; the first two remaining
+// positionals are the command and its target.
 const args: string[] = process.argv.slice(2);
 let command: string | null = null;
 let targetInput: string | null = null;
+let raw = false;
 
 for (const arg of args) {
-  if (!command) {
+  if (arg === '--raw') {
+    raw = true;
+  } else if (!command) {
     command = arg;
   } else if (!targetInput) {
     targetInput = arg;
@@ -39,7 +46,7 @@ async function main(): Promise<void> {
   try {
     switch (command) {
       case 'get':
-        await runGet(targetInput);
+        await runGet(targetInput, { raw });
         break;
 
       default:

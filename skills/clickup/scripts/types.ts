@@ -76,7 +76,25 @@ export interface ClickUpChecklist {
   [key: string]: unknown;
 }
 
+/**
+ * One selectable option of a `labels` or `drop_down` custom field.
+ *
+ * The two types disagree on which key holds the display text - `labels` uses
+ * `label`, `drop_down` uses `name` - so both are optional here.
+ */
+export interface ClickUpCustomFieldOption {
+  id?: string;
+  /** Display text for `drop_down` options. */
+  name?: string;
+  /** Display text for `labels` options. */
+  label?: string;
+  color?: string | null;
+  orderindex?: number;
+  [key: string]: unknown;
+}
+
 export interface ClickUpCustomFieldTypeConfig {
+  options?: ClickUpCustomFieldOption[];
   [key: string]: unknown;
 }
 
@@ -89,6 +107,16 @@ export interface ClickUpCustomField {
   required?: boolean;
   date_created?: string;
   hide_from_guests?: boolean;
+  [key: string]: unknown;
+}
+
+export interface ClickUpAttachment {
+  id?: string;
+  title?: string;
+  name?: string;
+  url?: string;
+  size?: number;
+  date?: string;
   [key: string]: unknown;
 }
 
@@ -128,6 +156,7 @@ export interface ClickUpTask {
   time_estimate?: number | null;
   time_spent?: number | null;
   custom_fields?: ClickUpCustomField[];
+  attachments?: ClickUpAttachment[];
   dependencies?: unknown[];
   linked_tasks?: unknown[];
   /** Present because the skill requests include_subtasks=true. */
@@ -178,8 +207,89 @@ export interface TaskRef {
   teamId: string | null;
 }
 
-/** The JSON object this skill prints on stdout. */
+/** The raw API pair, printed as-is under `--raw`. */
 export interface TaskQueryResult {
   task: ClickUpTask;
   comments: ClickUpComment[];
+}
+
+/**
+ * Condensed output - the default shape printed on stdout.
+ *
+ * Every field is optional: the condenser omits keys that are null, empty, or
+ * absent upstream, so a small task produces a small object.
+ */
+
+export interface CondensedChecklistItem {
+  name?: string;
+  resolved?: boolean;
+  assignee?: string;
+  children?: CondensedChecklistItem[];
+}
+
+export interface CondensedChecklist {
+  name?: string;
+  resolved?: number;
+  unresolved?: number;
+  items?: CondensedChecklistItem[];
+}
+
+export interface CondensedSubtask {
+  id?: string;
+  name?: string;
+  status?: string;
+  assignees?: string[];
+  priority?: string;
+  due_date?: string;
+}
+
+export interface CondensedAttachment {
+  title?: string;
+  url?: string;
+  size?: number;
+  date?: string;
+}
+
+export interface CondensedComment {
+  id?: string;
+  user?: string;
+  date?: string;
+  text?: string;
+  resolved?: boolean;
+  assignee?: string;
+  reply_count?: number;
+}
+
+export interface CondensedTask {
+  id?: string;
+  custom_id?: string;
+  name?: string;
+  url?: string;
+  status?: string;
+  priority?: string;
+  description?: string;
+  assignees?: string[];
+  creator?: string;
+  tags?: string[];
+  parent?: string;
+  list?: string;
+  folder?: string;
+  space?: string;
+  date_created?: string;
+  date_updated?: string;
+  due_date?: string;
+  start_date?: string;
+  time_estimate?: number;
+  /** Flat `field name -> value`, with label/dropdown ids resolved to their text. */
+  custom_fields?: Record<string, unknown>;
+  checklists?: CondensedChecklist[];
+  subtasks?: CondensedSubtask[];
+  attachments?: CondensedAttachment[];
+  linked_tasks?: unknown[];
+  dependencies?: unknown[];
+}
+
+export interface CondensedTaskQueryResult {
+  task: CondensedTask;
+  comments: CondensedComment[];
 }

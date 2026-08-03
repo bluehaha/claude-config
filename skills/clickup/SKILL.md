@@ -1,6 +1,7 @@
 ---
 name: ClickUp
 description: Read ClickUp task content via the ClickUp API - retrieve a task's fields, description, checklists, and comments as JSON. Use when working with ClickUp task URLs or IDs.
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/scripts/query.ts:*)
 ---
 
 # ClickUp
@@ -13,7 +14,7 @@ emitted as a single JSON object.
 ## Usage
 
 ```bash
-node ~/.claude/skills/clickup/scripts/query.ts get <url|id>
+node ~/.claude/skills/clickup/scripts/query.ts get <url|id> [--raw]
 ```
 
 Examples:
@@ -29,6 +30,20 @@ node ~/.claude/skills/clickup/scripts/query.ts get 86eyc0enm
 
 Both a task URL and a bare id are accepted. Pass the URL when you have it — a
 team-scoped URL carries the `team_id` needed to resolve custom task ids.
+
+## Output
+
+Condensed by default — the default output drops that scaffolding, flattens custom fields to `name -> value`,
+and resolves label/dropdown ids to their display text.
+
+```bash
+# Full unmodified API response — status colours, user ids/emails, orderindex,
+# per-subtask custom fields, thumbnail URLs
+node ~/.claude/skills/clickup/scripts/query.ts get 86eyc0enm --raw
+```
+
+Prefer the default; reach for `--raw` only when you need a field it omits. See
+[REFERENCE.md](REFERENCE.md#output-format) for the exact schema and cut list.
 
 ## When to use
 

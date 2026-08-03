@@ -1,17 +1,31 @@
 /**
  * `get <url|id>` - retrieve a task (fields, description, checklists) plus its
  * comments and print the pair as JSON.
+ *
+ * Output is condensed by default: the raw API response is dominated by metadata
+ * (full task objects per subtask, option lists for unset custom fields, seven
+ * URL variants per attachment) that crowds out the content. Pass `--raw` for
+ * the unmodified response.
  */
 
 import { getTask } from '../api/tasks.ts';
 import { getTaskComments } from '../api/comments.ts';
 import { parseTaskRef } from '../lib/parse.ts';
+import { condenseResult } from '../lib/condense.ts';
 import type { TaskQueryResult } from '../types.ts';
 
-export async function runGet(targetInput: string | null): Promise<void> {
+export interface GetOptions {
+  /** Print the unmodified API response instead of the condensed shape. */
+  raw?: boolean;
+}
+
+export async function runGet(
+  targetInput: string | null,
+  options: GetOptions = {},
+): Promise<void> {
   if (!targetInput) {
     console.error('Error: Task URL or ID required');
-    console.error('Usage: node scripts/query.ts get <url|id>');
+    console.error('Usage: node scripts/query.ts get <url|id> [--raw]');
     process.exit(1);
   }
 
@@ -32,5 +46,6 @@ export async function runGet(targetInput: string | null): Promise<void> {
   ]);
 
   const result: TaskQueryResult = { task, comments };
-  console.log(JSON.stringify(result, null, 2));
+  const output = options.raw ? result : condenseResult(result);
+  console.log(JSON.stringify(output, null, 2));
 }
