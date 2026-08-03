@@ -14,33 +14,36 @@
  * DEFAULT_TEAM_ID from .env.
  */
 
+import type { TaskRef } from '../types.ts';
+
 // A ClickUp team/workspace id is a run of digits. A task id is alphanumeric.
 const TEAM_SCOPED_RE = /\/t\/(\d+)\/([a-zA-Z0-9]+)/;
 const PLAIN_TASK_RE = /\/t\/([a-zA-Z0-9]+)/;
+const BARE_ID_RE = /^[a-zA-Z0-9]+$/;
 
 /**
- * @param {string} input - a task URL, or a bare task id
- * @returns {{ taskId: string, teamId: string|null } | null}
+ * @param input - a task URL, or a bare task id
+ * @returns the parsed reference, or null when nothing task-shaped was found
  */
-export function parseTaskRef(input) {
+export function parseTaskRef(input: string | null | undefined): TaskRef | null {
   if (!input) return null;
 
   const trimmed = input.trim();
 
   // Team-scoped URL: /t/{team_id}/{task_id} - URL team_id wins, task_id is custom.
   const scoped = trimmed.match(TEAM_SCOPED_RE);
-  if (scoped) {
+  if (scoped?.[1] && scoped[2]) {
     return { taskId: scoped[2], teamId: scoped[1] };
   }
 
   // Plain task URL: /t/{task_id}
   const plain = trimmed.match(PLAIN_TASK_RE);
-  if (plain) {
+  if (plain?.[1]) {
     return { taskId: plain[1], teamId: null };
   }
 
   // Bare id (no slashes, alphanumeric).
-  if (/^[a-zA-Z0-9]+$/.test(trimmed)) {
+  if (BARE_ID_RE.test(trimmed)) {
     return { taskId: trimmed, teamId: null };
   }
 

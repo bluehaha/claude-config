@@ -6,19 +6,25 @@
  * separately via the comments API.
  */
 
-import { apiRequest } from './client.mjs';
+import { apiRequest } from './client.ts';
+import type { ClickUpTask } from '../types.ts';
+
+export interface GetTaskOptions {
+  /**
+   * When set, look the task up by custom id
+   * (sends custom_task_ids=true&team_id=...).
+   */
+  teamId?: string | null;
+  includeSubtasks?: boolean;
+}
 
 /**
- * Retrieve a single task.
- *
- * @param {string} taskId
- * @param {object} [opts]
- * @param {string|null} [opts.teamId]  - when set, look the task up by custom id
- *                                        (sends custom_task_ids=true&team_id=...)
- * @param {boolean} [opts.includeSubtasks=true]
- * @returns {Promise<object>} the task object (checklists embedded)
+ * Retrieve a single task (checklists embedded).
  */
-export async function getTask(taskId, opts = {}) {
+export async function getTask(
+  taskId: string,
+  opts: GetTaskOptions = {},
+): Promise<ClickUpTask> {
   const { teamId = null, includeSubtasks = true } = opts;
 
   const params = new URLSearchParams();
@@ -33,5 +39,7 @@ export async function getTask(taskId, opts = {}) {
     params.set('team_id', teamId);
   }
 
-  return apiRequest(`/task/${encodeURIComponent(taskId)}?${params.toString()}`);
+  return apiRequest<ClickUpTask>(
+    `/task/${encodeURIComponent(taskId)}?${params.toString()}`,
+  );
 }

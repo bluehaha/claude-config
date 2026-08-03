@@ -1,0 +1,30 @@
+{
+  "//": "Type-checking only. The skill runs directly on Node >= 22.18 via native type stripping; nothing here emits JS. Check with: npx tsc --noEmit -p ~/.claude/skills/clickup",
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    // "Preserve" keeps these files ESM without needing a package.json
+    // "type": "module" marker, matching how Node actually executes them.
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

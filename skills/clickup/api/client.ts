@@ -2,16 +2,16 @@
  * ClickUp API client - core HTTP layer and environment handling
  */
 
-import { readFileSync, existsSync, appendFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, existsSync, appendFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-export const ENV_PATH = resolve(__dirname, '..', '.env');
+export const ENV_PATH: string = resolve(__dirname, '..', '.env');
 export const API_BASE = 'https://api.clickup.com/api/v2';
 
-// Load .env from skill directory
-export function loadEnv() {
+/** Load .env from the skill directory. Returns false if it is missing or unreadable. */
+export function loadEnv(): boolean {
   if (!existsSync(ENV_PATH)) {
     return false;
   }
@@ -30,13 +30,17 @@ export function loadEnv() {
       }
     }
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
 
-// Append a value to .env file
-export function appendToEnv(key, value, comment = null) {
+/** Append a key/value (with an optional preceding comment) to .env. */
+export function appendToEnv(
+  key: string,
+  value: string,
+  comment: string | null = null,
+): boolean {
   try {
     let content = '\n';
     if (comment) {
@@ -46,12 +50,18 @@ export function appendToEnv(key, value, comment = null) {
     appendFileSync(ENV_PATH, content);
     process.env[key] = value;
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }
 
-function requireToken() {
+/**
+ * Read the personal API token, exiting with setup instructions when absent.
+ *
+ * The `never` return branch is expressed via process.exit, so callers can treat
+ * the result as a plain string.
+ */
+function requireToken(): string {
   const token = process.env.CLICKUP_API_TOKEN;
   if (!token) {
     console.error('Error: CLICKUP_API_TOKEN not configured');
@@ -65,10 +75,18 @@ function requireToken() {
   return token;
 }
 
-// Make an API request against the ClickUp v2 API.
-// ClickUp expects the personal token in the Authorization header verbatim
-// (no "Bearer " prefix) - e.g. `Authorization: pk_12345...`.
-export async function apiRequest(endpoint, options = {}) {
+/**
+ * Make an API request against the ClickUp v2 API.
+ *
+ * ClickUp expects the personal token in the Authorization header verbatim
+ * (no "Bearer " prefix) - e.g. `Authorization: pk_12345...`.
+ *
+ * @typeParam T - the expected shape of the decoded JSON response.
+ */
+export async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> {
   const token = requireToken();
 
   const url = `${API_BASE}${endpoint}`;
@@ -104,7 +122,7 @@ export async function apiRequest(endpoint, options = {}) {
 
   const text = await response.text();
   if (!text) {
-    return {};
+    return {} as T;
   }
-  return JSON.parse(text);
+  return JSON.parse(text) as T;
 }

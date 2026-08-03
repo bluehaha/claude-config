@@ -28,8 +28,11 @@ see in the app. No per-task sharing step is required.
 ## Running Commands
 
 ```bash
-node ~/.claude/skills/clickup/query.mjs <command>
+node ~/.claude/skills/clickup/query.ts <command>
 ```
+
+Requires **Node >= 22.18**, which runs TypeScript directly via native type
+stripping. There is no build step and no dependencies to install.
 
 ### Commands
 
@@ -41,13 +44,13 @@ node ~/.claude/skills/clickup/query.mjs <command>
 
 ```bash
 # Team-scoped URL (custom task id + team_id, taken from the URL)
-node ~/.claude/skills/clickup/query.mjs get "https://app.clickup.com/t/3716037/86eyc0enm"
+node ~/.claude/skills/clickup/query.ts get "https://app.clickup.com/t/3716037/86eyc0enm"
 
 # Plain task URL — team_id comes from DEFAULT_TEAM_ID in .env
-node ~/.claude/skills/clickup/query.mjs get "https://app.clickup.com/t/86abc123"
+node ~/.claude/skills/clickup/query.ts get "https://app.clickup.com/t/86abc123"
 
 # Bare id — same fallback
-node ~/.claude/skills/clickup/query.mjs get 86eyc0enm
+node ~/.claude/skills/clickup/query.ts get 86eyc0enm
 ```
 
 ## Supported URL / ID Formats
@@ -101,6 +104,11 @@ A JSON object with two top-level keys:
 
 ## Technical Notes
 
+- Written in TypeScript and executed directly by Node's built-in type stripping,
+  so the skill stays dependency-free (no `package.json`, no `node_modules`).
+  Types are erased at load time and never type-checked at runtime — run `tsc`
+  for that. `erasableSyntaxOnly` in `tsconfig.json` rejects any syntax Node
+  cannot strip (enums, namespaces, parameter properties).
 - Uses the ClickUp API v2 (`https://api.clickup.com/api/v2`).
 - Auth is the personal token passed verbatim in the `Authorization` header
   (no `Bearer ` prefix).
