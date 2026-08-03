@@ -7,10 +7,11 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+// scripts/api -> scripts, where .env sits next to .env-example.
 export const ENV_PATH: string = resolve(__dirname, '..', '.env');
 export const API_BASE = 'https://api.clickup.com/api/v2';
 
-/** Load .env from the skill directory. Returns false if it is missing or unreadable. */
+/** Load .env from the scripts directory. Returns false if it is missing or unreadable. */
 export function loadEnv(): boolean {
   if (!existsSync(ENV_PATH)) {
     return false;
@@ -67,7 +68,7 @@ function requireToken(): string {
     console.error('Error: CLICKUP_API_TOKEN not configured');
     console.error('');
     console.error('Setup:');
-    console.error('  1. Copy .env-example to .env in the skill directory');
+    console.error('  1. Copy scripts/.env-example to scripts/.env');
     console.error('  2. In ClickUp, open Settings > Apps and generate a personal API token (starts with "pk_")');
     console.error('  3. Paste it into CLICKUP_API_TOKEN in .env');
     process.exit(1);

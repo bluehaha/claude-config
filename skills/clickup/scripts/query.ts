@@ -32,7 +32,7 @@ for (const arg of args) {
 }
 
 function showUsage(): never {
-  console.error(`Usage: node query.ts <command>
+  console.error(`Usage: node scripts/query.ts <command>
 
 Commands:
   get <url|id>   Retrieve a task + its comments as JSON
@@ -40,9 +40,9 @@ Commands:
 team_id is read from the URL (/t/{team_id}/{task_id}), else DEFAULT_TEAM_ID in .env.
 
 Examples:
-  node query.ts get "https://app.clickup.com/t/3716037/86eyc0enm"
-  node query.ts get 86abc123
-  node query.ts get 86eyc0enm`);
+  node scripts/query.ts get "https://app.clickup.com/t/3716037/86eyc0enm"
+  node scripts/query.ts get 86abc123
+  node scripts/query.ts get 86eyc0enm`);
   process.exit(1);
 }
 
@@ -58,7 +58,7 @@ async function main(): Promise<void> {
       case 'get': {
         if (!targetInput) {
           console.error('Error: Task URL or ID required');
-          console.error('Usage: node query.ts get <url|id>');
+          console.error('Usage: node scripts/query.ts get <url|id>');
           process.exit(1);
         }
 

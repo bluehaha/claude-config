@@ -1,5 +1,6 @@
 {
-  "//": "Type-checking only. The skill runs directly on Node >= 22.18 via native type stripping; nothing here emits JS. Check with: npx tsc --noEmit -p ~/.claude/skills/clickup",
+  "//": "Type-checking only. The skill runs directly on Node >= 22.18 via native type stripping; nothing here emits JS.",
+  "//check": "The skill ships no node_modules, so tsc and @types/node must be supplied at check time. Default typeRoots resolves from this file's directory, so --typeRoots must point at the temp install. From the skill root, run: npx -p typescript -p @types/node sh -c 'tsc --noEmit -p . --typeRoots \"$(dirname $(dirname $(which tsc)))/@types\"'",
   "compilerOptions": {
     "target": "ES2023",
     "lib": ["ES2023"],
