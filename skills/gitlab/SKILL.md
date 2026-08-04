@@ -1,6 +1,7 @@
 ---
 name: gitlab
 description: Interact with GitLab merge requests via the REST API - get MR details, diffs, comments, commits, and approvals, and post comments. Use when working with GitLab merge request URLs or IDs (including self-hosted instances).
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/query.mjs:*)
 ---
 
 # GitLab

@@ -1,6 +1,7 @@
 ---
 name: notion
 description: Read Notion page content via the Notion API - retrieve a page's properties and full block content rendered as markdown. Use when working with Notion page URLs or IDs.
+allowed-tools: Bash(node ${CLAUDE_SKILL_DIR}/query.mjs:*)
 ---
 
 # Notion
