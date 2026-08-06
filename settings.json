@@ -21,8 +21,8 @@
       "Bash(rg:*)",
       "WebFetch(domain:*)",
       "Read(*)",
-      "Bash(node ~/.claude/skills/clickup/query.mjs *)",
-      "Bash(node ~/.claude/skills/gitlab/query.mjs *)",
+      "Bash(node ~/.claude/skills/clickup/scripts/query.ts *)",
+      "Bash(node ~/.claude/skills/gitlab/scripts/query.ts *)",
       "Bash(node ~/.claude/skills/notion/query.mjs *)"
     ],
     "deny": [

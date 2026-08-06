@@ -1,1 +1,4 @@
+# Ignore .env file with the access token
+# Copy scripts/.env-example to scripts/.env and add your token
 .env
+scripts/.env
