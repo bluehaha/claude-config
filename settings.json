@@ -64,9 +64,8 @@
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
     "php-lsp@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
     "chrome-devtools-mcp@claude-plugins-official": false,
-    "playwright-skill@playwright-skill": true
+    "mattpocock-skills@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "playwright-skill": {

@@ -1,18 +1,20 @@
 /**
  * Notion blocks -> Markdown renderer
  *
- * Input is the block tree produced by api/pages.mjs (each block carries a
+ * Input is the block tree produced by api/pages.ts (each block carries a
  * `_children` array). Output is a markdown string.
  */
+
+import type { NotionBlock, NotionBlockData, NotionRichText } from '../types.ts';
 
 // --- Rich text -------------------------------------------------------------
 
 // Render a single rich_text item, applying annotations and links.
-function renderRichTextItem(rt) {
+function renderRichTextItem(rt: NotionRichText): string {
   let text = rt.plain_text ?? '';
   if (!text) return '';
 
-  const a = rt.annotations || {};
+  const a = rt.annotations ?? {};
 
   // Code spans shouldn't also get markdown emphasis wrapping inside them.
   if (a.code) {
@@ -32,7 +34,7 @@ function renderRichTextItem(rt) {
 }
 
 // Render an array of rich_text items to a markdown string.
-export function renderRichText(richText) {
+export function renderRichText(richText: NotionRichText[] | undefined | null): string {
   if (!Array.isArray(richText)) return '';
   return richText.map(renderRichTextItem).join('');
 }
@@ -41,10 +43,21 @@ export function renderRichText(richText) {
 
 const INDENT = '  ';
 
-// Render a list of blocks. `depth` controls indentation for nested content;
-// `numbering` carries the running counter for numbered lists at this level.
-function renderBlocks(blocks, depth = 0) {
-  const lines = [];
+/**
+ * Read a block's own payload - stored under a key equal to its `type`.
+ *
+ * The lookup is dynamic, so it is typed through the block's index signature and
+ * narrowed here rather than at each call site.
+ */
+function blockData(block: NotionBlock): NotionBlockData {
+  const type = block.type;
+  if (!type) return {};
+  return (block[type] as NotionBlockData | undefined) ?? {};
+}
+
+// Render a list of blocks. `depth` controls indentation for nested content.
+function renderBlocks(blocks: NotionBlock[], depth = 0): string[] {
+  const lines: (string | null)[] = [];
   let numberedCounter = 0;
 
   for (const block of blocks) {
@@ -57,12 +70,12 @@ function renderBlocks(blocks, depth = 0) {
     lines.push(renderBlock(block, depth, numberedCounter));
   }
 
-  // Drop empty renders (unsupported/void blocks may return '').
-  return lines.filter((l) => l !== null && l !== undefined);
+  // Drop empty renders (unsupported/void blocks may return null).
+  return lines.filter((l): l is string => l !== null && l !== undefined);
 }
 
 // Indent every line of a (possibly multi-line) string by `depth` levels.
-function indent(text, depth) {
+function indent(text: string, depth: number): string {
   if (depth <= 0) return text;
   const pad = INDENT.repeat(depth);
   return text
@@ -72,15 +85,15 @@ function indent(text, depth) {
 }
 
 // Render children of a block, indented one level deeper.
-function renderChildren(block, depth) {
+function renderChildren(block: NotionBlock, depth: number): string {
   if (!block._children || block._children.length === 0) return '';
   const rendered = renderBlocks(block._children, depth + 1);
   return rendered.length ? '\n' + rendered.join('\n') : '';
 }
 
-function renderBlock(block, depth, numbered) {
+function renderBlock(block: NotionBlock, depth: number, numbered: number): string | null {
   const type = block.type;
-  const data = block[type] || {};
+  const data = blockData(block);
   const text = renderRichText(data.rich_text);
 
   switch (type) {
@@ -152,7 +165,7 @@ function renderBlock(block, depth, numbered) {
       return renderTable(block, depth);
 
     case 'child_page':
-      // Not recursed into (see pages.mjs). Rendered as a reference.
+      // Not recursed into (see pages.ts). Rendered as a reference.
       return indent(`[📄 ${data.title || 'Untitled'}](https://www.notion.so/${(block.id || '').replace(/-/g, '')})`, depth);
 
     case 'child_database':
@@ -176,24 +189,40 @@ function renderBlock(block, depth, numbered) {
   }
 }
 
+/** Cells of one table_row block, or null when the block isn't a populated row. */
+function rowCells(row: NotionBlock): NotionRichText[][] | null {
+  const cells = (row.table_row as NotionBlockData | undefined)?.cells;
+  return Array.isArray(cells) ? cells : null;
+}
+
 // Render a table block. Its _children are table_row blocks.
-function renderTable(block, depth) {
-  const rows = (block._children || []).filter((c) => c.type === 'table_row');
-  if (rows.length === 0) return indent('<!-- empty table -->', depth);
+function renderTable(block: NotionBlock, depth: number): string {
+  const rows = (block._children ?? []).filter((c) => c.type === 'table_row');
+  const first = rows[0];
+  // `first` is checked rather than `rows.length` so the value is narrowed for
+  // the column-count read below.
+  if (!first) return indent('<!-- empty table -->', depth);
 
-  const hasColumnHeader = block.table?.has_column_header;
+  const firstCells = rowCells(first);
+  if (!firstCells) return indent('<!-- empty table -->', depth);
 
-  const renderRow = (row) =>
-    '| ' + row.table_row.cells.map((cell) => renderRichText(cell).replace(/\|/g, '\\|') || ' ').join(' | ') + ' |';
+  const hasColumnHeader = blockData(block).has_column_header;
 
-  const lines = [];
-  const [first, ...rest] = rows;
+  const renderRow = (row: NotionBlock): string =>
+    '| ' +
+    (rowCells(row) ?? [])
+      .map((cell) => renderRichText(cell).replace(/\|/g, '\\|') || ' ')
+      .join(' | ') +
+    ' |';
+
+  const lines: string[] = [];
+  const rest = rows.slice(1);
   lines.push(renderRow(first));
 
   // Markdown tables require a header separator row. Use the first row as header
   // when the table declares one; otherwise synthesize a blank header so the
   // table still renders.
-  const colCount = first.table_row.cells.length;
+  const colCount = firstCells.length;
   lines.push('| ' + Array(colCount).fill('---').join(' | ') + ' |');
 
   if (!hasColumnHeader) {
@@ -210,7 +239,7 @@ function renderTable(block, depth) {
 }
 
 // Top-level entry: render a page's block tree to markdown.
-export function blocksToMarkdown(blocks) {
+export function blocksToMarkdown(blocks: NotionBlock[]): string {
   const rendered = renderBlocks(blocks, 0);
   // Join with blank lines between top-level blocks for readable markdown.
   return rendered.join('\n\n');

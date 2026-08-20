@@ -1,0 +1,31 @@
+{
+  // Type-checking only. The skill runs directly on Node >= 22.18 via native type stripping; nothing here emits JS.
+  // The skill ships no node_modules, so tsc and @types/node must be supplied at check time. Default typeRoots resolves from this file's directory, so --typeRoots must point at the temp install. From the skill root, run: npx -p typescript -p @types/node sh -c 'tsc --noEmit -p . --typeRoots \"$(dirname $(dirname $(which tsc)))/@types\"'
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    // "Preserve" keeps these files ESM without needing a package.json
+    // "type": "module" marker, matching how Node actually executes them.
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
